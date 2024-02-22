@@ -1,0 +1,194 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id                      String                     @id @default(uuid())
+  email                   String                     @unique
+  phoneNumber             String?                    @unique
+  avatar                  String?
+  createdAt               DateTime                   @default(now())
+  updatedAt               DateTime                   @updatedAt
+  password                Password?
+  emailVerified           Boolean                    @default(false)
+  phoneNumberVerified     Boolean                    @default(false)
+  isStudent               Boolean                    @default(false)
+  studentId               String?
+  studentEmail            String?
+  suspended               Boolean                    @default(false)
+  role                    UserRole                   @relation(fields: [roleName], references: [name])
+  roleName                String                     @default("user")
+  isOrganization          Boolean                    @default(false)
+  organization            Organization?              @relation(fields: [organizationId], references: [id])
+  organizationId          String?
+  EventTicket             EventTicket[]
+  eventAppliedRequests    EventApplicationRequests[]
+  bookmarkedEvents        BookmarkedEvent[]
+  eventId                 String?
+  participatedEvents      EventParticipants[]
+  JobFairBoothApplication JobFairBoothApplication[]
+}
+
+model Password {
+  hash   String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  userId String @unique
+}
+
+model Organization {
+  id          String  @id @default(uuid())
+  name        String  @unique
+  image       String?
+  nip         String  @unique
+  email       String  @unique
+  phone       String? @unique
+  fullAddress String  @unique
+  postalCode  String
+  city        String
+  website     String? @unique
+  users       User[]
+}
+
+model UserRole {
+  name String @id @unique
+  user User[]
+}
+
+model Event {
+  id                      String                     @id @default(uuid())
+  name                    String
+  image                   String?
+  info                    String
+  body                    String
+  category                EventCategory              @relation(fields: [categoryName], references: [name])
+  categoryName            String
+  dateFrom                DateTime
+  timeFrom                DateTime?
+  dateTo                  DateTime?
+  timeTo                  DateTime?
+  needRegistration        Boolean                    @default(false)
+  hidden                  Boolean                    @default(false)
+  location                String
+  participants            EventParticipants[]
+  userApplicationRequests EventApplicationRequests[]
+  EventTicket             EventTicket[]
+  tags                    TagToEvent[]
+  createdAt               DateTime                   @default(now())
+  updatedAt               DateTime                   @updatedAt
+  usersBookmarked         BookmarkedEvent[]
+}
+
+model EventCategory {
+  name       String  @id
+  pluralName String
+  Event      Event[]
+}
+
+model JobFair {
+  id                      String                    @id @default(uuid())
+  name                    String
+  info                    String
+  body                    String
+  image                   String?
+  location                String
+  dateFrom                DateTime
+  dateTo                  DateTime
+  dailyTimeFrom           DateTime?
+  dailyTimeTo             DateTime?
+  hidden                  Boolean                   @default(false)
+  userId                  String?
+  JobFairBoothApplication JobFairBoothApplication[]
+}
+
+model Booth {
+  id                      String                    @id @default(uuid())
+  name                    String                    @unique
+  info                    String
+  images                  String[]
+  JobFairBoothApplication JobFairBoothApplication[]
+  sponsorshipPackage      JobFairSponsorshipPackage @relation(fields: [sponsorshipPackageName], references: [name])
+  sponsorshipPackageName  String
+}
+
+model JobFairBoothApplication {
+  id        String   @id @default(uuid())
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String
+  status    String // pending, accepted, rejected
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  booth     Booth    @relation(fields: [boothId], references: [id])
+  boothId   String
+  jobFair   JobFair  @relation(fields: [jobFairId], references: [id])
+  jobFairId String
+}
+
+model JobFairSponsorshipPackage {
+  name     String   @id
+  price    Decimal  @db.Decimal(10, 2)
+  benefits String[]
+  Booth    Booth[]
+}
+
+model Tag {
+  name       String       @id @unique
+  TagToEvent TagToEvent[]
+}
+
+model TagToEvent {
+  event   Event  @relation(fields: [eventId], references: [id])
+  eventId String
+  tag     Tag    @relation(fields: [tagName], references: [name])
+  tagName String
+
+  @@id([eventId, tagName])
+}
+
+model EventTicket {
+  name    String
+  user    User    @relation(fields: [userId], references: [id])
+  userId  String
+  qrCode  String?
+  info    String?
+  event   Event   @relation(fields: [eventId], references: [id])
+  eventId String
+
+  @@id([userId, eventId])
+}
+
+model EventParticipants {
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String
+  event     Event    @relation(fields: [eventId], references: [id])
+  eventId   String
+  createdAt DateTime @default(now())
+
+  @@id([userId, eventId])
+}
+
+model EventApplicationRequests {
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String
+  status    String // pending, accepted, rejected
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  event     Event    @relation(fields: [eventId], references: [id])
+  eventId   String
+
+  @@id([userId, eventId])
+}
+
+model BookmarkedEvent {
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String
+  event     Event    @relation(fields: [eventId], references: [id])
+  eventId   String
+  createdAt DateTime @default(now())
+
+  @@id([userId, eventId])
+}
