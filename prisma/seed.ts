@@ -8,58 +8,10 @@ const dummyUsers = [
         email: "test@example.com",
         role: {
             connect: {
-                name: "admin",
+                name: "user",
             },
         },
         phoneNumber: "666-666-6666",
-    },
-    {
-        email: "johnDoe@example.com",
-        role: {
-            connect: {
-                name: "user",
-            },
-        },
-        isStudent: true,
-        phoneNumber: "111-111-1111",
-    },
-    {
-        email: "harryJogger@example.com",
-        role: {
-            connect: {
-                name: "user",
-            },
-        },
-        isStudent: true,
-        phoneNumber: "222-222-2222",
-    },
-    {
-        email: "cloveMarlo@example.com",
-        role: {
-            connect: {
-                name: "user",
-            },
-        },
-        phoneNumber: "333-333-3333",
-    },
-    {
-        email: "tony@example.com",
-        role: {
-            connect: {
-                name: "admin",
-            },
-        },
-        phoneNumber: "444-444-4444",
-    },
-    {
-        email: "peterPan@example.com",
-        role: {
-            connect: {
-                name: "user",
-            },
-        },
-        isStudent: true,
-        phoneNumber: "555-555-5555",
     },
 ];
 
@@ -102,16 +54,20 @@ async function seed() {
         });
 
     for (const user of dummyUsers) {
-        await prisma.user.create({
-            data: {
-                ...user,
-                password: {
-                    create: {
-                        hash: bcrypt.hashSync("12345678", 10),
+        await prisma.user
+            .create({
+                data: {
+                    ...user,
+                    password: {
+                        create: {
+                            hash: bcrypt.hashSync("12345678", 10),
+                        },
                     },
                 },
-            },
-        });
+            })
+            .catch(() => {
+                // no worries if it exists
+            });
     }
 
     await prisma.eventCategory
