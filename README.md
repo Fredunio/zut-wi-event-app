@@ -1,13 +1,21 @@
-# Welcome to Remix!
+# Zut Event App
 
-- [Remix Docs](https://remix.run/docs)
+## How to start the app:
 
-## Development
+First, create .env file with 3 variables:
 
-From your terminal:
+-   `DATABASE_URL` – this is the url for remote connection to the database
+-   `SESSION_SECRET` – the secret used for authentication thanks to cookie sessions, can be generated using openssl rand -hex 32 or thanks to https://1password.com/password-generator/
+-   `TINY_API_KEY` – key needed for the text editor to work https://www.tiny.cloud/get-tiny/
+
+Then, from your terminal:
 
 ```sh
+npm install
+npm run build
+npm run setup
 npm run dev
+
 ```
 
 This starts your app in development mode, rebuilding assets on file changes.
@@ -34,5 +42,5 @@ If you're familiar with deploying node applications, the built-in Remix app serv
 
 Make sure to deploy the output of `remix build`
 
-- `build/`
-- `public/build/`
+-   `build/`
+-   `public/build/`
